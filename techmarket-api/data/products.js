@@ -1,4 +1,4 @@
-module.exports = [
+const products = [
   {
     id: 1,
     name: 'MacBook Pro 16"',
@@ -127,3 +127,5 @@ module.exports = [
     createdAt: "2023-10-20T13:40:00Z",
   },
 ];
+
+module.exports = products;
