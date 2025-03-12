@@ -1,28 +1,35 @@
 const { query } = require("../config/db");
 
 const getAllProducts = async (filters) => {
-    let sql = "SELECT * FROM products";
-    let params = [];
-    let conditions = [];
-  
-    if (filters.isAvailable !== undefined) {
-      conditions.push("is_available = $1");
+  let sql = "SELECT * FROM products";
+  let params = [];
+  let conditions = [];
+
+  if (filters.isAvailable !== undefined) {
+      conditions.push(`is_available = $${params.length + 1}`);
       params.push(filters.isAvailable === "true");
-    }
-  
-    if (conditions.length > 0) {
-      sql += " WHERE " + conditions.join(" AND ");
-    }
-  
-    if (filters.sortBy === "price") {
-      sql += " ORDER BY price ASC";
-    } else if (filters.sortBy === "-price") {
-      sql += " ORDER BY price DESC";
-    }
-  
-    const result = await query(sql, params);
-    return result.rows;
+  }
+
+  const validSortFields = {
+      "price": "price ASC",
+      "-price": "price DESC"
   };
+
+  if (conditions.length > 0) {
+    sql += " WHERE " + conditions.join(" AND ");
+}
+  if (filters.sortBy && validSortFields[filters.sortBy]) {
+      sql += ` ORDER BY ${validSortFields[filters.sortBy]}`;
+  }
+
+
+  console.log(sql);
+  const result = await query(sql, params);
+
+  return result.rows;
+};
+
+
 
 const getProductById = async (id) => {
   const result = await query("SELECT * FROM products WHERE id = $1", [id]);

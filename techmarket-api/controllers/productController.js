@@ -50,6 +50,10 @@ const addNewProduct = async (req, res) => {
       return res.status(400).json({ message: "Pola nie są wypełnione poprawnie" });
     }
 
+    if (typeof price !== "number" || typeof stockCount !== "number" || price < 0 || stockCount < 0 || stockCount % 1 !== 0) { 
+      return res.status(400).json({ message: "Nieprawidłowy format" });  
+    }
+
     const newProduct = await Product.addNewProduct({
       name,
       category,
@@ -71,6 +75,17 @@ const addNewProduct = async (req, res) => {
 const changeProduct = async (req, res) => {
   try {
     const { id } = req.params;
+
+    if (req.body.price === undefined || (typeof req.body.price !== "number" || req.body.price < 0)) {
+      return res.status(400).json({ message: "Nieprawidłowa cena" });
+    }
+
+    if (req.body.stockCount === undefined || (typeof req.body.stockCount !== "number" || req.body.stockCount < 0 || req.body.stockCount % 1 !== 0)) {
+      return res.status(400).json({ message: "Nieprawidłowy stock count" });
+    }
+
+    req.body.stockCount = parseInt(req.body.stockCount, 10);
+
     const updatedProduct = await Product.changeProduct(id, req.body);
 
     if (!updatedProduct) {
