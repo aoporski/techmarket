@@ -6,12 +6,12 @@ const insertProducts = async () => {
     for (const product of products) {
       await query(
         `INSERT INTO products 
-        (name, category, description, price, stock_count, brand, image_url, is_available, created_at) 
+        (name, category_id, description, price, stock_count, brand, image_url, is_available, created_at) 
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
         ON CONFLICT (id) DO NOTHING`, 
         [
           product.name,
-          product.category,
+          product.categoryId,
           product.description,
           product.price,
           product.stockCount,
