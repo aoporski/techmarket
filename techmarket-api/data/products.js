@@ -1,8 +1,7 @@
 const products = [
   {
-    id: 1,
     name: 'MacBook Pro 16"',
-    category: "Laptopy",
+    categoryId: 1, // Laptopy
     description: "Laptop Apple z procesorem M1 Pro, 16GB RAM, 512GB SSD",
     price: 9999.99,
     stockCount: 15,
@@ -12,9 +11,8 @@ const products = [
     createdAt: "2023-01-15T14:30:00Z",
   },
   {
-    id: 2,
     name: "Dell XPS 15",
-    category: "Laptopy",
+    categoryId: 1,
     description: "Ultrabook Dell XPS z procesorem Intel i9, 32GB RAM, 1TB SSD",
     price: 8499.99,
     stockCount: 10,
@@ -24,11 +22,9 @@ const products = [
     createdAt: "2023-02-01T10:00:00Z",
   },
   {
-    id: 3,
     name: "iPhone 14 Pro",
-    category: "Smartfony",
-    description:
-      "Flagowy smartfon Apple z 6.1-calowym ekranem OLED i A16 Bionic",
+    categoryId: 2, // Smartfony
+    description: "Flagowy smartfon Apple z 6.1-calowym ekranem OLED i A16 Bionic",
     price: 5999.99,
     stockCount: 20,
     brand: "Apple",
@@ -37,11 +33,9 @@ const products = [
     createdAt: "2023-03-10T12:45:00Z",
   },
   {
-    id: 4,
     name: "Samsung Galaxy S23 Ultra",
-    category: "Smartfony",
-    description:
-      "Najpotężniejszy smartfon Samsunga z 200MP aparatem i Snapdragonem 8 Gen 2",
+    categoryId: 2,
+    description: "Najpotężniejszy smartfon Samsunga z 200MP aparatem i Snapdragonem 8 Gen 2",
     price: 6299.99,
     stockCount: 18,
     brand: "Samsung",
@@ -50,11 +44,9 @@ const products = [
     createdAt: "2023-04-05T08:20:00Z",
   },
   {
-    id: 5,
     name: "Sony WH-1000XM5",
-    category: "Audio",
-    description:
-      "Bezprzewodowe słuchawki z redukcją szumów i 30-godzinną baterią",
+    categoryId: 3, // Audio
+    description: "Bezprzewodowe słuchawki z redukcją szumów i 30-godzinną baterią",
     price: 1799.99,
     stockCount: 25,
     brand: "Sony",
@@ -63,9 +55,8 @@ const products = [
     createdAt: "2023-05-20T16:15:00Z",
   },
   {
-    id: 6,
     name: "Apple Watch Series 8",
-    category: "Smartwatche",
+    categoryId: 4, // Smartwatche
     description: "Nowoczesny smartwatch Apple z funkcją EKG i monitorem snu",
     price: 2299.99,
     stockCount: 30,
@@ -75,11 +66,9 @@ const products = [
     createdAt: "2023-06-12T09:50:00Z",
   },
   {
-    id: 7,
     name: "Logitech MX Master 3",
-    category: "Akcesoria",
-    description:
-      "Bezprzewodowa mysz komputerowa z ergonomicznym kształtem i precyzyjnym czujnikiem",
+    categoryId: 5, // Akcesoria
+    description: "Bezprzewodowa mysz komputerowa z ergonomicznym kształtem",
     price: 499.99,
     stockCount: 40,
     brand: "Logitech",
@@ -88,11 +77,9 @@ const products = [
     createdAt: "2023-07-08T11:30:00Z",
   },
   {
-    id: 8,
     name: "Razer BlackWidow V4",
-    category: "Klawiatury",
-    description:
-      "Mechaniczna klawiatura gamingowa z podświetleniem RGB i przełącznikami Razer Green",
+    categoryId: 6, // Klawiatury
+    description: "Mechaniczna klawiatura gamingowa z podświetleniem RGB",
     price: 699.99,
     stockCount: 35,
     brand: "Razer",
@@ -101,11 +88,9 @@ const products = [
     createdAt: "2023-08-15T14:10:00Z",
   },
   {
-    id: 9,
     name: 'LG OLED C2 55"',
-    category: "Telewizory",
-    description:
-      "Telewizor OLED 4K HDR z systemem webOS i wsparciem dla Dolby Vision",
+    categoryId: 7, // Telewizory
+    description: "Telewizor OLED 4K HDR z systemem webOS i Dolby Vision",
     price: 6499.99,
     stockCount: 8,
     brand: "LG",
@@ -114,11 +99,9 @@ const products = [
     createdAt: "2023-09-01T18:00:00Z",
   },
   {
-    id: 10,
     name: "PlayStation 5",
-    category: "Konsole",
-    description:
-      "Konsola nowej generacji od Sony z superszybkim SSD i wsparciem dla gier w 4K",
+    categoryId: 8, // Konsole
+    description: "Konsola nowej generacji od Sony z szybkim SSD i wsparciem dla gier 4K",
     price: 2999.99,
     stockCount: 12,
     brand: "Sony",

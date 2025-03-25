@@ -33,11 +33,9 @@ const getProductById = async (req, res) => {
 
 const addNewProduct = async (req, res) => {
   try {
-    console.log("Received product data:", req.body);
-
     const {
       name,
-      category,
+      categoryId,
       description,
       price,
       stockCount,
@@ -46,17 +44,17 @@ const addNewProduct = async (req, res) => {
       isAvailable,
     } = req.body;
 
-    if (!name || !category || !description || price === undefined || stockCount === undefined || !brand || !imageUrl) {
+    if (!name || !categoryId || !description || price === undefined || stockCount === undefined || !brand || !imageUrl) {
       return res.status(400).json({ message: "Pola nie są wypełnione poprawnie" });
     }
 
-    if (typeof price !== "number" || typeof stockCount !== "number" || price < 0 || stockCount < 0 || stockCount % 1 !== 0) { 
-      return res.status(400).json({ message: "Nieprawidłowy format" });  
+    if (typeof price !== "number" || typeof stockCount !== "number" || price < 0 || stockCount < 0 || stockCount % 1 !== 0) {
+      return res.status(400).json({ message: "Nieprawidłowy format danych" });
     }
 
     const newProduct = await Product.addNewProduct({
       name,
-      category,
+      categoryId,
       description,
       price: parseFloat(price),
       stockCount: parseInt(stockCount),
@@ -75,18 +73,35 @@ const addNewProduct = async (req, res) => {
 const changeProduct = async (req, res) => {
   try {
     const { id } = req.params;
+    const {
+      name,
+      categoryId,
+      description,
+      price,
+      stockCount,
+      brand,
+      imageUrl,
+      isAvailable,
+    } = req.body;
 
-    if (req.body.price === undefined || (typeof req.body.price !== "number" || req.body.price < 0)) {
-      return res.status(400).json({ message: "Nieprawidłowa cena" });
+    if (!name || !categoryId || !description || price === undefined || stockCount === undefined || !brand || !imageUrl) {
+      return res.status(400).json({ message: "Pola nie są wypełnione poprawnie" });
     }
 
-    if (req.body.stockCount === undefined || (typeof req.body.stockCount !== "number" || req.body.stockCount < 0 || req.body.stockCount % 1 !== 0)) {
-      return res.status(400).json({ message: "Nieprawidłowy stock count" });
+    if (typeof price !== "number" || typeof stockCount !== "number" || price < 0 || stockCount < 0 || stockCount % 1 !== 0) {
+      return res.status(400).json({ message: "Nieprawidłowy format danych" });
     }
 
-    req.body.stockCount = parseInt(req.body.stockCount, 10);
-
-    const updatedProduct = await Product.changeProduct(id, req.body);
+    const updatedProduct = await Product.changeProduct(id, {
+      name,
+      categoryId,
+      description,
+      price: parseFloat(price),
+      stockCount: parseInt(stockCount),
+      brand,
+      imageUrl,
+      isAvailable,
+    });
 
     if (!updatedProduct) {
       return res.status(404).json({ message: "Produkt nie znaleziony" });
@@ -108,7 +123,7 @@ const deleteProduct = async (req, res) => {
       return res.status(404).json({ message: "Produkt nie znaleziony" });
     }
 
-    res.status(200).json({ message: "Produkt usunięty", deletedProduct });
+    res.json({ message: "Produkt usunięty", deletedProduct });
   } catch (error) {
     console.error("Błąd usuwania produktu:", error);
     res.status(500).json({ message: "Błąd serwera" });
