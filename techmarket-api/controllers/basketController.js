@@ -59,12 +59,12 @@ const removeFromBasket = async (req, res) => {
       const deletedCount = await Basket.destroy({ where: { user_id, product_id } });
   
       if (deletedCount === 0) {
-        return res.status(404).json({ error: 'Produkt nie znaleziony w koszyku 😢' });
+        return res.status(404).json({ error: 'Produkt nie znaleziony w koszyku' });
       }
   
-      res.status(204).send(); // 🧼 usunięte
+      res.status(204).send(); 
     } catch (err) {
-      res.status(500).json({ error: 'Błąd podczas usuwania produktu 😵', details: err });
+      res.status(500).json({ error: 'Błąd podczas usuwania produktu', details: err });
     }
   };
   
