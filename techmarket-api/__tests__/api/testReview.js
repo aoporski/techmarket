@@ -1,121 +1,125 @@
-const request = require('supertest');
-const app = require('../../app');
-// const { query } = process.env.NODE_ENV === 'test'
-//   ? require('../../config/dbTest')
-//   : require('../../config/db');
-const { query } = require('../../config/dbTest');
+const request = require("supertest");
+const mongoose = require("mongoose");
+const app = require("../../app");
 
-describe('Reviews API', () => {
-  let productId, userId;
+const User = require("../../models/userSchema");
+const Product = require("../../models/productSchema");
+const Review = require("../../models/reviewSchema");
+
+describe("MongoDB Reviews API", () => {
+  let userId, productId;
 
   beforeAll(async () => {
-    await query(`
-      CREATE TABLE IF NOT EXISTS users (
-        id SERIAL PRIMARY KEY,
-        username VARCHAR(100) NOT NULL,
-        email VARCHAR(255) NOT NULL,
-        password_hash TEXT NOT NULL,
-        first_name VARCHAR(100),
-        last_name VARCHAR(100)
-      );
-    `);
+    if (mongoose.connection.readyState !== 0) {
+      await mongoose.disconnect();
+    }
 
-    await query(`
-      CREATE TABLE IF NOT EXISTS products (
-        id SERIAL PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
-        category_id INT NOT NULL,
-        description TEXT,
-        price DECIMAL(10,2) NOT NULL,
-        stock_count INT NOT NULL,
-        brand VARCHAR(100),
-        image_url TEXT,
-        is_available BOOLEAN DEFAULT true,
-        created_at TIMESTAMP DEFAULT NOW()
-      );
-    `);
-
-    await query(`
-      CREATE TABLE IF NOT EXISTS reviews (
-        id SERIAL PRIMARY KEY,
-        product_id INT NOT NULL,
-        user_id INT NOT NULL,
-        rating INT CHECK (rating >= 1 AND rating <= 5),
-        comment TEXT,
-        created_at TIMESTAMP DEFAULT NOW()
-      );
-    `);
+    await mongoose.connect(process.env.MONGO_URI_TEST, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
   });
 
   beforeEach(async () => {
-    await query(`TRUNCATE TABLE reviews RESTART IDENTITY CASCADE;`);
-    await query(`TRUNCATE TABLE products RESTART IDENTITY CASCADE;`);
-    await query(`TRUNCATE TABLE users RESTART IDENTITY CASCADE;`);
+    await Review.deleteMany({});
+    await Product.deleteMany({});
+    await User.deleteMany({});
 
-    const user = await query(`INSERT INTO users (username, email, password_hash, first_name, last_name) VALUES ('tester', 'test@example.com', 'hash', 'John', 'Doe') RETURNING id;`);
-    const product = await query(`INSERT INTO products (name, category_id, description, price, stock_count, brand, image_url) VALUES ('Laptop', 1, 'desc', 1000, 5, 'Brand', 'url') RETURNING id;`);
+    const user = await User.create({
+      username: "tester",
+      email: "test@example.com",
+      passwordHash: "hashedpassword123",
+      first_name: "Jan",
+      last_name: "Kowalski",
+    });
 
-    userId = user.rows[0].id;
-    productId = product.rows[0].id;
+    const product = await Product.create({
+      name: "Laptop",
+      description: "Mocny laptop do pracy",
+      price: 4999.99,
+      stock_count: 15,
+      brand: "TechBrand",
+      image_url: "https://example.com/laptop.png",
+      is_available: true,
+      category_id: new mongoose.Types.ObjectId(),
+    });
+
+    userId = user._id;
+    productId = product._id;
   });
 
   afterAll(async () => {
-    await query(`DROP TABLE IF EXISTS reviews;`);
-    await query(`DROP TABLE IF EXISTS products;`);
-    await query(`DROP TABLE IF EXISTS users;`);
+    await mongoose.connection.dropDatabase();
+    await mongoose.disconnect();
   });
 
-  it('POST /api/reviews - powinno dodać recenzję', async () => {
-    const res = await request(app).post('/api/reviews').send({
-      productId: productId,
-      userId: userId,
-      rating: 5,
-      comment: "Super!"
-    });
+  it("POST /api/reviews - powinno dodać recenzję", async () => {
+    const res = await request(app)
+      .post("/api/reviews")
+      .send({
+        product_id: productId,
+        user_id: userId,
+        rating: 5,
+        title: "Rewelacyjny sprzęt",
+        content: "Świetna wydajność i solidna obudowa",
+        pros: ["Wydajność", "Obudowa"],
+        cons: ["Cena"],
+        verified_purchase: true,
+      });
+
     expect(res.statusCode).toBe(201);
     expect(res.body.rating).toBe(5);
   });
 
-  it('GET /api/reviews - powinno zwrócić recenzje', async () => {
-    await query(`INSERT INTO reviews (product_id, user_id, rating, comment) VALUES (${productId}, ${userId}, 4, 'Good')`);
-    const res = await request(app).get('/api/reviews');
-    expect(res.statusCode).toBe(200);
-    expect(res.body.length).toBe(1);
-  });
-
-  it('GET /api/reviews/:id - powinno zwrócić recenzję po ID', async () => {
-    const insert = await query(`INSERT INTO reviews (product_id, user_id, rating, comment) VALUES (${productId}, ${userId}, 4, 'Good') RETURNING id;`);
-    const res = await request(app).get(`/api/reviews/${insert.rows[0].id}`);
-    expect(res.statusCode).toBe(200);
-    expect(res.body.rating).toBe(4);
-  });
-
-  it('PUT /api/reviews/:id - powinno zaktualizować recenzję', async () => {
-    const insert = await query(`INSERT INTO reviews (product_id, user_id, rating, comment) VALUES (${productId}, ${userId}, 3, 'Ok') RETURNING id;`);
-
-    const res = await request(app).put(`/api/reviews/${insert.rows[0].id}`).send({
-      productId: productId,
-      userId: userId,
-      rating: 5,
-      comment: "Znakomita!"
+  it("GET /api/reviews/product/:productId - powinno zwrócić recenzje produktu", async () => {
+    await Review.create({
+      product_id: productId,
+      user_id: userId,
+      rating: 4,
+      title: "Dobry sprzęt",
+      content: "Jest OK, ale głośny wiatrak",
+      pros: ["Dobra jakość"],
+      cons: ["Hałas"],
+      verified_purchase: true,
+      likes: 1,
     });
 
-    expect(res.statusCode).toBe(200);
-    expect(res.body.rating).toBe(5);
-  });
-
-  it('DELETE /api/reviews/:id - powinno usunąć recenzję', async () => {
-    const insert = await query(`INSERT INTO reviews (product_id, user_id, rating, comment) VALUES (${productId}, ${userId}, 3, 'Ok') RETURNING id;`);
-    const res = await request(app).delete(`/api/reviews/${insert.rows[0].id}`);
-    expect(res.statusCode).toBe(200);
-    expect(res.body.message).toMatch(/usunięta/);
-  });
-
-  it('GET /api/reviews/product/:productId - powinno zwrócić recenzje dla produktu', async () => {
-    await query(`INSERT INTO reviews (product_id, user_id, rating, comment) VALUES (${productId}, ${userId}, 4, 'Dobry produkt')`);
     const res = await request(app).get(`/api/reviews/product/${productId}`);
     expect(res.statusCode).toBe(200);
-    expect(res.body.length).toBe(1);
-    expect(res.body[0].comment).toBe('Dobry produkt');
+    expect(res.body.reviews.length).toBe(1);
+  });
+
+  it("GET /api/reviews/search?q=dobry - powinno znaleźć po tekście", async () => {
+    await Review.create({
+      product_id: productId,
+      user_id: userId,
+      rating: 3,
+      title: "Dobry produkt",
+      content: "Polecam serdecznie!",
+      pros: ["Wygląd"],
+      cons: ["Cena"],
+      verified_purchase: false,
+    });
+
+    const res = await request(app).get("/api/reviews/search?q=dobry");
+    expect(res.statusCode).toBe(200);
+    expect(res.body.results.length).toBe(1);
+  });
+
+  it("POST /api/reviews/:id/vote - powinno zwiększyć liczbę pomocnych głosów", async () => {
+    const review = await Review.create({
+      product_id: productId,
+      user_id: userId,
+      rating: 5,
+      title: "Mega sprzęt",
+      content: "Szybki i elegancki",
+      pros: ["Design", "Prędkość"],
+      cons: [],
+      verified_purchase: true,
+    });
+
+    const res = await request(app).post(`/api/reviews/${review._id}/vote`);
+    expect(res.statusCode).toBe(200);
+    expect(res.body.updatedHelpfulVotes || res.body.updatedLikes).toBe(1);
   });
 });

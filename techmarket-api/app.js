@@ -8,7 +8,8 @@ const categoryRoutes = require("./routes/categoryRoutes");
 const userRoutes = require("./routes/userRoutes");
 const reviewRoutes = require("./routes/reviewRoutes");
 const basketRoutes = require("./routes/basketRoutes");
-const { testConnection } = require('./config/db_orm');
+const { testConnection } = require("./config/db_orm");
+const { connectMongoDB } = require("./config/db_mongo"); // ⬅ dodano
 
 const app = express();
 
@@ -26,8 +27,9 @@ app.use("/api/users", userRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/basket", basketRoutes);
 
-
 testConnection();
+connectMongoDB();
+
 app.use(notFound);
 app.use(errorHandler);
 

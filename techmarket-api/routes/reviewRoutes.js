@@ -5,16 +5,22 @@ const {
   addNewReview,
   changeReview,
   deleteReview,
-  getReviewsForProduct, 
-} = require("../controllers/reviewController");
+  getReviewsForProduct,
+  getReviewStats,
+  searchReviews,
+  voteHelpful,
+} = require("../controllers/reviewControllerMongo"); //require("../controllers/reviewController");
 
 const router = express.Router();
 
 router.get("/", getAllReviews);
-router.get("/:id", getReviewById);
-router.post("/", addNewReview);
 router.put("/:id", changeReview);
 router.delete("/:id", deleteReview);
 router.get("/product/:productId", getReviewsForProduct);
+router.get("/product/:productId/stats", getReviewStats);
+router.get("/search", searchReviews);
+router.post("/:id/vote", voteHelpful);
+router.post("/", addNewReview);
+router.post("/", addNewReview);
 
 module.exports = router;
